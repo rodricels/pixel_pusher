@@ -30,7 +30,7 @@ function pixel_pusher_menu() {
     'title' => t('Pixel Pusher settings'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('pixel_pusher_admin_settings'),
-    'type' => MENU_NORMAL,
+    'type' => MENU_NORMAL_ITEM,
     'access arguments' => array('administer pixel_pusher'),
   );
 
