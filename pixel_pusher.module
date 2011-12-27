@@ -77,11 +77,10 @@ function pixel_pusher_admin_settings() {
 function pixel_pusher_block($op = 'list', $delta = 0, $edit = array()) {
   switch ($op) {
     case 'list':
-      $blocks = array();
-
       $blocks[0] = array(
         'info' => t('Pixel Counter tracker pixel'),
         'weight' => 0,
+        'cache' => BLOCK_CACHE_PER_PAGE,
       );
 
       return $blocks;
@@ -91,7 +90,15 @@ function pixel_pusher_block($op = 'list', $delta = 0, $edit = array()) {
 
       switch ($delta) {
         case 0:
-          $node = menu_get_object('node');
+          if (!empty($_GET['q'])) {
+            $nid = str_replace('node/', '', $_GET['q']);
+            $node = new stdClass();
+            $node->nid = $nid;
+          }
+          else {
+            $node = menu_get_object('node');
+          }
+
           if (!empty($node) && is_null(arg(2))) {
             $block['subject'] = FALSE;
             $server_url = variable_get('pixel_pusher_remote', 'http://127.0.0.1');
@@ -112,12 +119,12 @@ function pixel_pusher_save_hits() {
     if ($results) {
       pixel_pusher_write_hits($results);
       if (variable_get('pixel_pusher_debug', 0)) {
-        watchdog('Pixel Ping', print_r($results, TRUE), array(), WATCHDOG_DEBUG);
+        watchdog('Pixel Ping', '@var' , array('@var' => print_r($results, TRUE)), WATCHDOG_DEBUG);
       }
     }
   }
   else {
-    watchdog('Pixel Ping', 'No "json" object received.  Raw data: ' . print_r($_REQUEST, TRUE), array(), WATCHDOG_WARNING);
+    watchdog('Pixel Ping', 'No "json" object received.  Raw data: @var', array('@var' => print_r($_REQUEST, TRUE)), WATCHDOG_WARNING);
   }
 }
 
@@ -150,7 +157,7 @@ function pixel_pusher_write_hits($results) {
         }
 
         if (variable_get('pixel_pusher_debug', 0)) {
-          watchdog('Pixel Pusher', 'Updated node nid=%node by %amount', array('%node' => $path[1], '%amount' => $val));
+          watchdog('Pixel Pusher', 'Updated node nid=@node by @amount', array('@node' => $path[1], '@amount' => $val));
         }
       }
 
